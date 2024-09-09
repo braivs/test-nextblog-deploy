@@ -9,13 +9,20 @@ export function getPostSlugs() {
   return fs.readdirSync(postsDirectory);
 }
 
+const config = require('../../next.config');
+
 export function getPostBySlug(slug: string) {
   const realSlug = slug.replace(/\.md$/, "");
   const fullPath = join(postsDirectory, `${realSlug}.md`);
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
 
-  return { ...data, slug: realSlug, content } as Post;
+
+  let dataStr = JSON.stringify(data);
+  dataStr = dataStr.replace(/\${basePath}/gi, config.basePath);
+  const dataObj = JSON.parse(dataStr);
+
+  return { ...dataObj, slug: realSlug, content } as Post;
 }
 
 export function getAllPosts(): Post[] {
